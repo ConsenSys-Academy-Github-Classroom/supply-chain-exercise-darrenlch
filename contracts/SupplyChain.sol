@@ -4,27 +4,34 @@ pragma solidity >=0.5.16 <0.9.0;
 contract SupplyChain {
 
   // <owner>
-
+  address public owner;
   // <skuCount>
-
+  uint public skuCount;
   // <items mapping>
-
+  mapping (uint => Item) public items;
   // <enum State: ForSale, Sold, Shipped, Received>
-
+  enum State { ForSale, Sold, Shipped, Received}
   // <struct Item: name, sku, price, state, seller, and buyer>
-  
+  struct Item {
+    string name;
+    uint sku;
+    uint price;
+    State state;
+    address payable seller;
+    address payable buyer;
+  }
   /* 
    * Events
    */
 
   // <LogForSale event: sku arg>
-
+  event LogForSale(uint sku);
   // <LogSold event: sku arg>
-
+  event LogSold(uint sku);
   // <LogShipped event: sku arg>
-
+  event LogShipped(uint sku);
   // <LogReceived event: sku arg>
-
+  event LogReceived(uint sku);
 
   /* 
    * Modifiers
@@ -33,7 +40,10 @@ contract SupplyChain {
   // Create a modifer, `isOwner` that checks if the msg.sender is the owner of the contract
 
   // <modifier: isOwner
-
+  modifier isOwner(address _address){
+    require(owner == _address);
+    _;
+  }
   modifier verifyCaller (address _address) { 
     // require (msg.sender == _address); 
     _;
@@ -72,9 +82,20 @@ contract SupplyChain {
 
   function addItem(string memory _name, uint _price) public returns (bool) {
     // 1. Create a new item and put in array
+    items[skuCount] = Item({
+      name: _name, 
+      sku: skuCount, 
+      price: _price, 
+      state: State.ForSale, 
+      seller: msg.sender, 
+      buyer: address(0)
+    });
     // 2. Increment the skuCount by one
+    skuCount += 1;
     // 3. Emit the appropriate event
+    emit LogForSale(skuCount);
     // 4. return true
+    return true;
 
     // hint:
     // items[skuCount] = Item({
